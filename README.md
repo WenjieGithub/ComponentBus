@@ -17,15 +17,15 @@ plugins {
 plugins {
     // 一般来说建议 app module 内尽量不写代码，只作为构建应用及配置信息，所以 ksp 是否添加根据项目考虑
     id "com.google.devtools.ksp"
-    id 'love.nuoyan.android.component_bus_register' version '0.1.1'
+    id 'love.nuoyan.android.component_bus_register' version '0.1.3'
 }
 
 // 扫描列表会根据包路径匹配需要扫描的文件
 componentBusExt {
     // 需要扫描的包路径名称，把需要扫描的进行添加(拦截器或组件API的包路径名称，路径可以是开头部分)
-    packagePathScanList = [
-            "com.xxx.xxx",
-            "com.xxx.xxx"
+    packageNameScanList = [
+            "com.xxx.bbb",
+            "com.xxx.aaa"
     ]
 }
 
@@ -62,8 +62,8 @@ android {
 }
 
 // 添加依赖
-implementation 'love.nuoyan.android:component_bus:0.1.1'
-ksp "love.nuoyan.android:component_bus_processor:0.1.1"
+api 'love.nuoyan.android:component_bus:0.1.3'
+ksp "love.nuoyan.android:component_bus_processor:0.1.3"
 ```
 
 ## 4. module 内添加组件 API
@@ -131,7 +131,7 @@ object LogGlobalInterceptor : GlobalInterceptor() {
     init {
         priority = 8    // 用于设置拦截器的优先级，越高执行顺序越靠前
     }
-    
+
     override suspend fun <T> intercept(chain: Chain): Result<T> {
         Log.e("LogGlobalInterceptor", "${chain.request.componentName} 执行了 LogGlobalInterceptor 0")
         return chain.proceed()
@@ -151,7 +151,7 @@ val result = ComponentBus.with("组件名称", "事件名称")
     .interceptors("TestInterceptor")
     .apply {
         params["params2"] = 2   // 两种添加参数方式是等效的
-        interceptors.add("TestInterceptor2") 
+        interceptors.add("TestInterceptor2")
     }
     .callSync<Boolean>()
 ```
