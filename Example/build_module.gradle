@@ -1,0 +1,7 @@
+apply from: '../build_base.gradle'
+
+android {
+    defaultConfig {
+        consumerProguardFiles "consumer-rules.pro"
+    }
+}

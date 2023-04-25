@@ -1,0 +1,28 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id "com.google.devtools.ksp"
+    id 'love.nuoyan.android.component_bus_register'
+}
+
+componentBusExt {
+    packageNameScanList = [
+            "love.nuoyan.android"
+    ]
+}
+
+apply from: '../build_base.gradle'
+
+android {
+    namespace 'love.nuoyan.android.example'
+
+    defaultConfig {
+        applicationId "love.nuoyan.android.example"
+        versionCode 1
+        versionName "1.0"
+    }
+}
+
+dependencies {
+
+}

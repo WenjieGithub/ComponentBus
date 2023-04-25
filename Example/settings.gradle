@@ -1,0 +1,23 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "Example"
+include ':app'
+include ':component_main'
+include ':component_old'
+include ':component_share'
+include ':lib_component'
+include ':lib_pay'
+include ':lib_witget'
+include ':component_login'
