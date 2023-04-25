@@ -1,56 +1,73 @@
 ext {
-    componentBusV = '0.2.0'
+    componentBusV = '0.2.1'
 
     // 全部构建
     allBuild = true
     // allBuild = true 时生效，打包时忽略模块, local.properties 内若配置会替换当前配置
-    ignorePackage = []
+    ignoreModule = []
     // allBuild = false 时生效，打包时需要的模块, local.properties 内若配置会替换当前配置
-    needPackage = []
+    needModule = []
 
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
     ab = properties.getProperty("allBuild")
     if (ab != null) { allBuild = ab.toBoolean() }
-    ip = properties.getProperty("ignorePackage")
-    if (ip != null) {
-        ignorePackage.clear()
-        ignorePackage.addAll(ip.split(","))
+    im = properties.getProperty("ignoreModule")
+    if (im != null) {
+        ignoreModule.clear()
+        ignoreModule.addAll(im.split(","))
     }
-    np = properties.getProperty("needPackage")
-    if (np != null) {
-        needPackage.clear()
-        needPackage.addAll(np.split(","))
+    nm = properties.getProperty("needModule")
+    if (nm != null) {
+        needModule.clear()
+        needModule.addAll(nm.split(","))
     }
 }
 
 task("module") {
     def modules = getSubprojects()
-    project("app") { p ->
-        p.afterEvaluate {
-            println "==============================================================="
-            println " 全功能打包：" + allBuild
-            println " "
-            modules.each() { module ->
-                if (module != p) {
-                    if (allBuild) {
-                        if (ignorePackage.contains(module.name) && module.name != "lib_component") {
-                            println " 全功能打包，不添加的模块: " + module.name
-                        } else {
-                            println " 全功能打包，已添加模块(build): " + module.name
-                            p.dependencies.add("implementation", project(module.path))
-                        }
-                    } else {
-                        if (needPackage.contains(module.name) || module.name == "lib_component") {
-                            println " 部分功能打包，已添加模块: " + module.name
-                            p.dependencies.add("implementation", project(module.path))
-                        } else {
-                            println " 部分功能打包，不添加的模块: " + module.name
+    subprojects { p ->
+        if (!p.name.startsWith("lib_")) {
+            if (p.name == "app") {
+                p.afterEvaluate {
+                    println " allBuild：" + allBuild
+                    modules.each() { module ->
+                        if (module != p) {
+                            if (allBuild) {
+                                if (ignoreModule.contains(module.name) && !module.name.startsWith("lib_")) {
+                                    println " del dependencies: " + module.name
+                                } else {
+                                    println " add dependencies: " + module.name
+                                    p.dependencies.add("implementation", project(module.path))
+                                }
+                            } else {
+                                if (needModule.contains(module.name) || module.name.startsWith("lib_")) {
+                                    println " add dependencies: " + module.name
+                                    p.dependencies.add("implementation", project(module.path))
+                                } else {
+                                    println " del dependencies: " + module.name
+                                }
+                            }
                         }
                     }
+                    p.dependencies.add("ksp", "love.nuoyan.android:component_bus_processor:$componentBusV")
+                }
+            } else {
+                p.afterEvaluate {
+                    modules.each() { module ->
+                        if (module != p && module.name.startsWith("lib_")) {
+                            println "add dependencies: " + module.name
+                            p.dependencies.add("implementation", project(module.path))
+                        }
+                    }
+                    p.dependencies.add("ksp", "love.nuoyan.android:component_bus_processor:$componentBusV")
                 }
             }
-            println "==============================================================="
+        } else {
+            p.afterEvaluate {
+                p.dependencies.add("api", "love.nuoyan.android:component_bus:$componentBusV")
+                p.dependencies.add("ksp", "love.nuoyan.android:component_bus_processor:$componentBusV")
+            }
         }
     }
 }

@@ -1,6 +1,8 @@
 # ComponentBus
 ComponentBus 用于组件（module）间的通信, 而不必相互依赖.
 
+参考 example 实践示例
+
 ## 1. project build.gradle 内添加 ksp 插件
 ```groovy
 plugins {
@@ -9,14 +11,13 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
 
     id "com.google.devtools.ksp" version "1.7.10-1.0.6" apply false
-    id 'love.nuoyan.android.component_bus_register' version '0.2.0' apply false
+    id 'love.nuoyan.android.component_bus_register' version '0.2.1' apply false
 }
 ```
 
 ## 2. app module build.gradle 内添加插件、要扫描的jar包、ksp 生成文件引入
 ```groovy
 plugins {
-    // 一般来说建议 app module 内尽量不写代码，只作为构建应用的架子及配置信息，所以 ksp 是否添加根据项目考虑
     id "com.google.devtools.ksp"
     id 'love.nuoyan.android.component_bus_register'
 }
@@ -38,8 +39,8 @@ plugins {
 }
 
 // 添加依赖
-api 'love.nuoyan.android:component_bus:0.2.0'
-ksp "love.nuoyan.android:component_bus_processor:0.2.0"
+api 'love.nuoyan.android:component_bus:0.2.1'
+ksp "love.nuoyan.android:component_bus_processor:0.2.1"
 ```
 
 ## 4. module 内添加组件 API
