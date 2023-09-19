@@ -1,0 +1,106 @@
+/**
+ * 在 local.properties 可以配置四个属性: (ext 优先级高于 local.properties)
+ *  channel
+ *      构建渠道, 默认为"", 可在构建时指定参数, 用于根据参数构建
+ *  allBuild
+ *      是否全部 module 构建, 默认为 true, 全部 module 构建应用
+ *  ignoreModule
+ *      allBuild = true 时生效，打包时忽略的模块, 注意: 以 lib_ 开头命名的 module 并不生效;
+ *      local.properties 内配置, 用逗号分隔: ignoreModule = component_google,component_audio_service
+ *  needModule
+ *      allBuild = false 时生效，打包时需要的模块, 注意: 以 lib_ 开头命名的 module 并不生效;
+ *      local.properties 内配置, 用逗号分隔: needModule = component_statistics
+ *
+ * 命名规则:
+ *  1. 以 lib_depend 命名的 module, 在所有的 module 内都会依赖, 包括以 lib_ 开头命名的 module;
+ *  2. 以 lib_ 开头命名的 module, 所有非 lib_ 开头命名的 module 内都会依赖;
+ *  3. 非 lib_ 开头命名的 module, 并不强制要求命名, 但建议以 component_ 开头命名;
+ *  4. 配置 ignoreModule 时, 以 lib_ 开头的名称并不生效;
+ *  5. 配置 needModule 时, 并不需要配置以 lib_ 开头的名称, 因为它们都会在内部依赖;
+ *
+ *  综上: ignoreModule、needModule 只控制非 lib_ 开头命名的 module;
+ *
+ *
+ * 参数化构建, 项目 build.gradle 内配置:
+ *  1. 构建时添加 channel 属性:  -Dchannel=test (优先级高于 local.properties)
+ *  2. 根据 channel 值, 配置 ignoreModule、needModule, 此配置也可在 build.gradle ext 内配置;
+ *  3. 当值为默认值 "" 时, 并不做参数化构建, 使用 local.properties 内配置;
+ *
+ *
+ * ksp 依赖自动写入
+ *  ext 内定义 ksps 值为字符串数组, item 为依赖 path
+ *  ksps = ["com.squareup.moshi:moshi-kotlin-codegen:1.14.0"]
+ */
+
+ext {
+    componentBusV = '0.1.0'
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+    // 构建渠道
+    channel = System.getProperty("channel", properties.getProperty("channel", ""))
+    // 全部构建
+    allBuild = properties.getProperty("allBuild", "true").toBoolean()
+    // allBuild = true 时生效，打包时忽略模块, local.properties 内若配置会替换当前配置
+    ignoreModule = properties.getProperty("ignoreModule", "").split(",").toList()
+    // allBuild = false 时生效，打包时需要的模块, local.properties 内若配置会替换当前配置
+    needModule = properties.getProperty("needModule", "").split(",").toList()
+    // ksp 依赖自动写入
+    ksps = []
+}
+
+task("projectComponentDepend") {
+    def modules = getSubprojects()
+    def depend = modules.find { it.name == "lib_depend" }
+    subprojects { p ->
+        p.afterEvaluate {
+            if (p.name == "app") {
+                println " channel：" + channel
+                println " allBuild：" + allBuild
+                if (allBuild) {
+                    println " ignoreModule：" + ignoreModule
+                } else {
+                    println " needModule：" + needModule
+                }
+                modules.each() { module ->
+                    if (module != p) {
+                        if (allBuild) {
+                            if (ignoreModule.contains(module.name) && !module.name.startsWith("lib_")) {
+                                println " del dependencies: " + module.name
+                            } else {
+                                println " add dependencies: " + module.name
+                                p.dependencies.add("implementation", project(module.path))
+                            }
+                        } else {
+                            if (needModule.contains(module.name) || module.name.startsWith("lib_")) {
+                                println " add dependencies: " + module.name
+                                p.dependencies.add("implementation", project(module.path))
+                            } else {
+                                println " del dependencies: " + module.name
+                            }
+                        }
+                    }
+                }
+                p.dependencies.add("ksp", "cn.moltres.component_bus:processor:$componentBusV")
+                ksps.each() { k -> p.dependencies.add("ksp", k) }
+            } else if (p.name.startsWith("lib_")) {
+                if (depend != null && depend != p) {
+                    p.dependencies.add("implementation", project(depend.path))
+                }
+                p.dependencies.add("api", "cn.moltres.component_bus:core:$componentBusV")
+                p.dependencies.add("ksp", "cn.moltres.component_bus:processor:$componentBusV")
+                ksps.each() { k -> p.dependencies.add("ksp", k) }
+            } else {
+                modules.each() { module ->
+                    if (module != p && module.name.startsWith("lib_")) {
+                        println " add dependencies: " + module.name
+                        p.dependencies.add("implementation", project(module.path))
+                    }
+                }
+                p.dependencies.add("ksp", "cn.moltres.component_bus:processor:$componentBusV")
+                ksps.each() { k -> p.dependencies.add("ksp", k) }
+            }
+        }
+    }
+}
