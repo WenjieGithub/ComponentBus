@@ -33,7 +33,7 @@
  */
 
 ext {
-    componentBusV = '0.1.0'
+    componentBusV = '0.3.0'
 
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
