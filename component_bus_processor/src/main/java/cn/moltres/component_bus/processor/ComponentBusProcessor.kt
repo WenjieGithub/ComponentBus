@@ -157,6 +157,7 @@ class ComponentBusProcessor(private val environment: SymbolProcessorEnvironment)
                             var ${name}V: $typeName = null
                             if (request.params.containsKey("$name")) {
                               try {
+                                @Suppress("UNCHECKED_CAST")
                                 ${name}V = request.params["$name"] as $typeName
                               } catch(e: Exception) {
                                 return Result.resultErrorParams<T>(-5, 
@@ -174,6 +175,7 @@ class ComponentBusProcessor(private val environment: SymbolProcessorEnvironment)
                             when {
                               request.params.containsKey("$name") -> {
                                 try {
+                                  @Suppress("UNCHECKED_CAST")
                                   ${name}V = request.params["$name"] as $typeName
                                 } catch(e: Exception) {
                                   return Result.resultErrorParams<T>(-5, 
@@ -259,6 +261,7 @@ class ComponentBusProcessor(private val environment: SymbolProcessorEnvironment)
                                 var ${name}V: $typeName = null
                                 if (request.params.containsKey("$name")) {
                                   try {
+                                    @Suppress("UNCHECKED_CAST")
                                     ${name}V = request.params["$name"] as $typeName
                                   } catch(e: Exception) {
                                     return Result.resultErrorParams<T>(-5, 
@@ -276,6 +279,7 @@ class ComponentBusProcessor(private val environment: SymbolProcessorEnvironment)
                                 when {
                                   request.params.containsKey("$name") -> {
                                     try {
+                                      @Suppress("UNCHECKED_CAST")
                                       ${name}V = request.params["$name"] as $typeName
                                     } catch(e: Exception) {
                                       return Result.resultErrorParams<T>(-5, 
