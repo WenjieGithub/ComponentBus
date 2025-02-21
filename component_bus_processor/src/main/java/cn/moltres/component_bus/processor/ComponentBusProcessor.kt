@@ -210,8 +210,10 @@ class ComponentBusProcessor(private val environment: SymbolProcessorEnvironment)
             """
                 )
                 if (fr is Result<*>) {
+                  @Suppress("UNCHECKED_CAST")
                   fr as Result<T>
                 } else {
+                  @Suppress("UNCHECKED_CAST")
                   Result.resultSuccess(fr as T)
                 }
                 
@@ -310,8 +312,10 @@ class ComponentBusProcessor(private val environment: SymbolProcessorEnvironment)
                 """
                     )
                     if (fr is Result<*>) {
+                      @Suppress("UNCHECKED_CAST")
                       fr as Result<T>
                     } else {
+                      @Suppress("UNCHECKED_CAST")
                       Result.resultSuccess(fr as T)
                     }
                 

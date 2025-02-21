@@ -7,4 +7,4 @@ plugins {
 
 val isDev by extra(true)
 val groupId by extra("cn.moltres.component_bus")
-val componentBusVersion by extra("0.3.0")
+val componentBusVersion by extra("0.3.5")
